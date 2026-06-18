@@ -1,10 +1,10 @@
-# 🤖 MATLAB Academy Auto-Solver
+# MATLAB Academy Auto-Solver
 
 An AI-powered automation tool that completes **MATLAB Onramp** exercises on [MATLAB Academy](https://matlabacademy.mathworks.com/) automatically. It uses browser automation (Playwright) and AI vision/code generation (Groq LLM) to read tasks, generate MATLAB code, type it into the interactive environment, and advance through the course.
 
 ---
 
-## ✨ Features
+## Features
 
 - **Automatic exercise solving** — reads task descriptions, generates MATLAB code via AI, and types it into the browser
 - **Dual mode support** — handles both **Command Window** and **Live Editor** exercise types
@@ -16,7 +16,7 @@ An AI-powered automation tool that completes **MATLAB Onramp** exercises on [MAT
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 matlab-automation/
@@ -37,7 +37,7 @@ matlab-automation/
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### Prerequisites
 
@@ -106,7 +106,7 @@ The solver will:
 
 ---
 
-## 🛠️ Utility Scripts
+## Utility Scripts
 
 ### Inspect DOM Structure
 
@@ -126,7 +126,7 @@ python test_typing.py
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 | Variable | Location | Description |
 |----------|----------|-------------|
@@ -136,7 +136,7 @@ python test_typing.py
 
 ---
 
-## 🧩 How It Works
+## How It Works
 
 ```
 ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
@@ -165,12 +165,12 @@ python test_typing.py
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This tool is intended for **educational and personal use only**. Use it responsibly and in accordance with MathWorks' terms of service. The authors are not responsible for any misuse or consequences resulting from the use of this tool.
 
 ---
 
-## 📄 License
+## License
 
 This project is open source. Feel free to fork, modify, and improve it.
