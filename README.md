@@ -1,18 +1,27 @@
 # MATLAB Academy Auto-Solver
 
-An AI-powered automation tool that completes **MATLAB Onramp** exercises on [MATLAB Academy](https://matlabacademy.mathworks.com/) automatically. It uses browser automation (Playwright) and AI vision/code generation (Groq LLM) to read tasks, generate MATLAB code, type it into the interactive environment, and advance through the course.
+An AI-powered automation tool that completes **any MATLAB Academy course** on [MATLAB Academy](https://matlabacademy.mathworks.com/) automatically. It uses browser automation (Playwright) and AI vision/code generation (Groq LLM) to read tasks, generate MATLAB code, type it into the interactive environment, and advance through the course.
+
+Works with all MATLAB Academy courses including:
+- MATLAB Onramp
+- MATLAB Desktop Tools and Troubleshooting Scripts
+- MATLAB Project-Based Learning
+- Any other MATLAB Academy interactive course
 
 ---
 
 ## Features
 
+- **Works with any MATLAB Academy course** — just change the URL in `auto_solver.py`
 - **Automatic exercise solving** — reads task descriptions, generates MATLAB code via AI, and types it into the browser
 - **Dual mode support** — handles both **Command Window** and **Live Editor** exercise types
+- **Auto-skips video/lecture pages** — detects non-interactive pages and clicks Next automatically
 - **AI-powered code generation** — uses Groq's Llama models to generate correct MATLAB commands
 - **Vision-based error recovery** — takes screenshots and uses multimodal AI to detect errors and retry with corrected code
 - **Stealth browsing** — uses `playwright-stealth` to avoid bot detection
 - **Session persistence** — saves login cookies so you only need to authenticate once
 - **Auto-retry logic** — retries failed answers up to 3 times with AI-guided corrections
+- **Section break and text support** — handles "Add a section" and "Add text" type tasks in Live Editor
 
 ---
 
@@ -42,7 +51,7 @@ matlab-automation/
 ### Prerequisites
 
 - **Python 3.9+**
-- **A MathWorks account** with access to [MATLAB Onramp](https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted)
+- **A MathWorks account** with access to [MATLAB Academy](https://matlabacademy.mathworks.com/)
 - **A Groq API key** — get one free at [console.groq.com](https://console.groq.com/)
 
 ### Step 1: Clone the Repository
@@ -90,7 +99,23 @@ This will:
 
 > **Note:** You only need to do this once. The saved session will be reused until it expires.
 
-### Step 5: Run the Auto-Solver
+### Step 5: Set Your Target Course
+
+Open `auto_solver.py` and update the `DIRECT_URL` in the `resume_course` function to the course you want to solve:
+
+```python
+DIRECT_URL = "https://matlabacademy.mathworks.com/v1/portal.html?course=YOUR_COURSE#chapter=1&lesson=1"
+```
+
+Example course URLs:
+
+| Course | URL |
+|--------|-----|
+| MATLAB Onramp | `...?course=gettingstarted#chapter=1&lesson=1` |
+| Desktop Tools & Troubleshooting | `...?course=otmldts#chapter=1&lesson=1` |
+| Project-Based Learning | `...?course=otmlprc#chapter=1&lesson=1` |
+
+### Step 6: Run the Auto-Solver
 
 ```bash
 python auto_solver.py
@@ -98,11 +123,12 @@ python auto_solver.py
 
 The solver will:
 1. Open a browser with your saved session
-2. Navigate to the MATLAB Onramp course and click **Resume**
-3. Detect each exercise type (Command Window or Live Editor)
-4. Use AI to generate the correct MATLAB code
-5. Type the code, verify correctness, and advance to the next task
-6. Repeat until the course is complete or 5 consecutive failures occur
+2. Navigate directly to your target course and chapter
+3. Auto-skip video and lecture pages
+4. Detect each exercise type (Command Window or Live Editor)
+5. Use AI to generate the correct MATLAB code
+6. Type the code, verify correctness, and advance to the next task
+7. Repeat until the course is complete
 
 ---
 
@@ -131,7 +157,7 @@ python test_typing.py
 | Variable | Location | Description |
 |----------|----------|-------------|
 | `GROQ_API_KEY` | `.env` file | Your Groq API key for AI code generation |
-| `COURSE_LANDING_URL` | `auto_solver.py` | The MATLAB Academy course URL (default: MATLAB Onramp) |
+| `DIRECT_URL` | `auto_solver.py` | The direct course URL to solve (supports any MATLAB Academy course) |
 | `MAX_RETRIES` | `auto_solver.py` | Max retry attempts per task (default: 3) |
 
 ---
@@ -140,9 +166,19 @@ python test_typing.py
 
 ```
 ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
-│  Read Task   │────▶│  AI Generates │────▶│  Type Code   │
-│  Description │     │  MATLAB Code  │     │  in Browser  │
-└──────────────┘     └───────────────┘     └──────┬───────┘
+│  Load Page   │────▶│  Video/Lecture │────▶│  Click Next  │
+│              │     │  Page?        │ Yes │  (Auto-skip) │
+└──────────────┘     └───────┬───────┘     └──────────────┘
+                             │ No
+                     ┌───────▼───────┐
+                     │  Read Task    │
+                     │  Description  │
+                     └───────┬───────┘
+                             │
+                     ┌───────▼───────┐     ┌──────────────┐
+                     │  AI Generates │────▶│  Type Code   │
+                     │  MATLAB Code  │     │  in Browser  │
+                     └───────────────┘     └──────┬───────┘
                                                   │
                      ┌───────────────┐     ┌──────▼───────┐
                      │  Retry with   │◀────│  Check if    │
@@ -155,13 +191,15 @@ python test_typing.py
                                            └──────────────┘
 ```
 
-1. **Frame Detection** — locates the MATLAB interactive iframe within the page
-2. **Mode Detection** — determines if the exercise uses the Command Window or Live Editor
-3. **Task Extraction** — reads the task description from the DOM
-4. **Code Generation** — sends the task to Groq's Llama model to generate MATLAB code
-5. **Code Entry** — types the generated code into the appropriate input area
-6. **Verification** — checks for "Correct!" banner or uses vision AI to detect errors
-7. **Retry/Advance** — retries with corrected code on failure, or advances on success
+1. **Page Detection** — checks if the current page is a video/lecture or an interactive exercise
+2. **Auto-Skip** — automatically clicks Next on non-interactive pages (videos, lectures, surveys)
+3. **Frame Detection** — locates the MATLAB interactive iframe within the page
+4. **Mode Detection** — determines if the exercise uses the Command Window or Live Editor
+5. **Task Extraction** — reads the task description from the DOM
+6. **Code Generation** — sends the task to Groq's Llama model to generate MATLAB code
+7. **Code Entry** — types the generated code into the appropriate input area
+8. **Verification** — checks for "Correct!" banner or uses vision AI to detect errors
+9. **Retry/Advance** — retries with corrected code on failure, or advances on success
 
 ---
 
